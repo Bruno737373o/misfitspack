@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # Focando nas arquiteturas mais usadas em Android
         arch: [arm64-v8a, armeabi-v7a]
 
     steps:
@@ -18,17 +19,33 @@ jobs:
         with:
           path: project
 
-      - name: Checkout GameAPI Dependency
+      - name: Checkout GameAPI (Bruno737373o)
         uses: actions/checkout@v4
         with:
-          repository: RSDK-Reverse/GameAPI
-          path: game-api-repo
+          repository: Bruno737373o/RSDKv5-Decompilation
+          path: mania-decomp
 
       - name: Setup GameAPI Structure
         run: |
-          mkdir -p project/GameAPI
-          # Copia a pasta C (que contém a subpasta GameAPI) para dentro de project/GameAPI
-          cp -r game-api-repo/C project/GameAPI/
+          # Criar a estrutura necessária para o CMakeLists.txt do mod
+          mkdir -p project/GameAPI/C
+          
+          # No repositório RSDKv5-Decompilation, a GameAPI costuma estar na raiz ou em RSDKv5
+          # Este comando tenta copiar de RSDKv5/GameAPI/C para a pasta do projeto
+          if [ -d "mania-decomp/RSDKv5/GameAPI/C" ]; then
+            cp -r mania-decomp/RSDKv5/GameAPI/C/GameAPI project/GameAPI/C/
+          else
+            cp -r mania-decomp/GameAPI/C/GameAPI project/GameAPI/C/
+          fi
+          
+          # Verificação final para garantir que o CMake encontrará o arquivo
+          if [ -f "project/GameAPI/C/GameAPI/Game.c" ]; then
+            echo "GameAPI configurada com sucesso."
+          else
+            echo "ERRO: Game.c não encontrado. Verificando onde os arquivos estão..."
+            find mania-decomp -name "Game.c"
+            exit 1
+          fi
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
@@ -50,5 +67,5 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: MisfitsPack-${{ matrix.arch }}
+          name: MisfitsPack-Android-${{ matrix.arch }}
           path: project/build/*.so
