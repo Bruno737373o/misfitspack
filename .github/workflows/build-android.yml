@@ -27,13 +27,12 @@ jobs:
       - name: Setup GameAPI Structure
         run: |
           mkdir -p project/GameAPI/C/GameAPI
-          SOURCE_DIR="mania-decomp/GameAPI/C/GameAPI"
+          SOURCE_DIR="mania-decomp/RSDKv5/GameAPI/C/GameAPI"
           if [ -d "$SOURCE_DIR" ]; then
             cp -rf $SOURCE_DIR/* project/GameAPI/C/GameAPI/
           else
-            echo "Erro: Pasta não encontrada em $SOURCE_DIR"
-            ls -F mania-decomp
-            exit 1
+            REAL_PATH=$(find mania-decomp -iname "Game.c" | head -n 1 | sed 's/\/Game.c//')
+            cp -rf $REAL_PATH/* project/GameAPI/C/GameAPI/
           fi
 
       - name: Setup Android NDK
