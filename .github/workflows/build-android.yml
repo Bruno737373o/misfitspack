@@ -1,0 +1,50 @@
+name: Build Android Binaries
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Permite rodar manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Define as arquiteturas comuns para Android
+        arch: [arm64-v8a, armeabi-v7a, x86_64]
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Instalar Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c # Versão estável recomendada
+
+      - name: Compilar com CMake
+        run: |
+          mkdir build-${{ matrix.arch }}
+          cd build-${{ matrix.arch }}
+          cmake .. \
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=${{ matrix.arch }} \
+            -DANDROID_PLATFORM=android-21 \
+            -DCMAKE_BUILD_TYPE=Release
+          make
+
+      - name: Upload do Binário
+        uses: actions/upload-artifact@v4
+        with:
+          name: misfitspack-${{ matrix.arch }}
+          path: build-${{ matrix.arch }}/*.so 
+          
