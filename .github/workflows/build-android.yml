@@ -21,17 +21,14 @@ jobs:
       - name: Checkout GameAPI Dependency
         uses: actions/checkout@v4
         with:
-          repository: Rubberduckycooly/Sonic-Mania-Decompilation
-          path: mania-decomp
+          repository: RSDK-Reverse/GameAPI
+          path: game-api-repo
 
       - name: Setup GameAPI Structure
         run: |
           mkdir -p project/GameAPI
-          if [ -d "mania-decomp/RSDKv5/GameAPI/C" ]; then
-            cp -r mania-decomp/RSDKv5/GameAPI/C project/GameAPI/
-          else
-            cp -r mania-decomp/GameAPI/C project/GameAPI/
-          fi
+          # Copia a pasta C (que contém a subpasta GameAPI) para dentro de project/GameAPI
+          cp -r game-api-repo/C project/GameAPI/
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
