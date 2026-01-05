@@ -26,25 +26,14 @@ jobs:
 
       - name: Setup GameAPI Structure
         run: |
-          # Criar o caminho que o CMake do mod exige
           mkdir -p project/GameAPI/C/GameAPI
-          
-          # Procurar qualquer pasta chamada 'GameAPI' que contenha arquivos .c e .h
-          # O repositório do Bruno tem em: mania-decomp/RSDKv5/GameAPI/C/GameAPI
-          SOURCE_PATH="mania-decomp/RSDKv5/GameAPI/C/GameAPI"
-          
-          if [ -d "$SOURCE_PATH" ]; then
-            cp -r $SOURCE_PATH/. project/GameAPI/C/GameAPI/
-            echo "Arquivos copiados de $SOURCE_PATH"
+          SOURCE_DIR="mania-decomp/RSDKv5/GameAPI/C/GameAPI"
+          if [ -d "$SOURCE_DIR" ]; then
+            cp -rf $SOURCE_DIR/* project/GameAPI/C/GameAPI/
           else
-            # Plano B: Procura em qualquer lugar do repo ignorando maiúsculas/minúsculas
-            SOURCE_PATH=$(find mania-decomp -iname "GameAPI" -type d | grep "C/GameAPI" | head -n 1)
-            cp -r $SOURCE_PATH/. project/GameAPI/C/GameAPI/
-            echo "Arquivos copiados via busca dinâmica de $SOURCE_PATH"
+            echo "Erro: Pasta não encontrada em $SOURCE_DIR"
+            exit 1
           fi
-          
-          # Verificação final obrigatória
-          ls -l project/GameAPI/C/GameAPI/Game.c
 
       - name: Setup Android NDK
         uses: nttld/setup-ndk@v1
